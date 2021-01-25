@@ -58,26 +58,35 @@ class MyPromise {
         }
     }
 
-    // then方法返回一个promise对象
+    // 注册在这个Promise状态确定后的回调
+    // then方法返回一个新的promise对象
     // 对于异步的then方法，需要等待Promise完成
     then = (successCallback, failedCallback) => {
 
         let promise = new MyPromise((resolve, reject) => {
-            // 成功
-            if (this._state === STATE.FULFILLED) {
-                let value = successCallback(this._value);
-                resolvePromise(value, resolve, reject);
-                return;
+            try {
+                // 成功
+                if (this._state === STATE.FULFILLED) {
+                    setTimeout(() => {
+                        let value = successCallback(this._value);
+                        resolvePromise(value, resolve, reject);
+                    }, 0)
+                    return;
+                }
+                // 失败
+                if (this._state === STATE.REJECTED) {
+                    setTimeout(() => {
+                        let reason = failedCallback(this._reason);
+                        reject(reason);
+                    }, 0)
+                    return;
+                }
+                // 等待 -> 待状态变成fullfiled或者rejected时调用
+                this._successCallback.push(successCallback);
+                this._failedCallback.push(failedCallback);
+            } catch (e) {
+                reject(e)
             }
-            // 失败
-            if (this._state === STATE.REJECTED) {
-                let reason = failedCallback(this._reason);
-                reject(reason);
-                return;
-            }
-            // 等待 -> 待状态变成fullfiled或者rejected时调用
-            this._successCallback.push(successCallback);
-            this._failedCallback.push(failedCallback);
         })
 
         return promise;
