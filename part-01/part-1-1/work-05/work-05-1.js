@@ -4,16 +4,16 @@
 // Promise构造函数需要一个执行器函数，并且该执行器函数会立即执行
 // 同时会给执行器函数传递两个参数：resolve 和 reject 函数，用于修改Promise的状态
 // resolve函数需要一个value，reject需要一个reason
-// let promise = new Promise(function (resolve, reject) {
-//     setTimeout(function () {
-//         let num = Math.floor(Math.random() * 10);
-//         if (num % 2 === 0) {
-//             resolve(num);
-//         } else {
-//             reject('num % 2 !== 0');
-//         }
-//     }, 3000);
-// })
+let promise = new Promise(function (resolve, reject) {
+    setTimeout(function () {
+        let num = Math.floor(Math.random() * 10);
+        if (num % 2 === 0) {
+            resolve(num);
+        } else {
+            reject('num % 2 !== 0');
+        }
+    }, 3000);
+})
 
 // then方法是用来添加Promise状态明确后的回调函数
 // then方法需要两个函数：onFulfilled 和 onRejected函数，onRejected可以省略
@@ -71,6 +71,17 @@
 //     console.log(reason);
 // })
 
+promise.then()
+    .then()
+    .then(function (value) {
+        console.log('---------- Promise chain empty callback success ----------')
+        console.log(value);
+    })
+    .catch(function (reason) {
+        console.log('---------- Promise chain empty callback failed ----------')
+        console.log(reason);
+    });
+
 const MyPromise = require('./MyPromise');
 
 let myPromise = new MyPromise(function (resolve, reject) {
@@ -78,12 +89,12 @@ let myPromise = new MyPromise(function (resolve, reject) {
     // reject(456);
     setTimeout(function () {
         let num = Math.floor(Math.random() * 10);
-        resolve(num);
-        // if (num % 2 === 0) {
-        //     resolve(num);
-        // } else {
-        //     reject('num % 2 !== 0');
-        // }
+        // resolve(num);
+        if (num % 2 === 0) {
+            resolve(num);
+        } else {
+            reject('num % 2 !== 0');
+        }
     }, 3000);
 });
 
@@ -125,14 +136,46 @@ let myPromise = new MyPromise(function (resolve, reject) {
 myPromise.then(function (value) {
     console.log('---------- MyPromise chain callback success 1 ----------')
     console.log(value);
-    return new MyPromise(function(resolve, reject) {
+    return new MyPromise(function (resolve, reject) {
         resolve('HELLO ~')
     })
 }).then(function (value) {
     console.log('---------- MyPromise chain callback success 2 ----------')
     console.log(value);
-    return 100
-}).then(function(value) {
-    console.log('---------- MyPromise chain callback success 2 ----------')
-    console.log(value);
-})
+    throw new Error('my promise error')
+}).then(
+    function (value) {
+        console.log('---------- MyPromise chain callback success 3 ----------')
+        console.log(value);
+        throw new Error('a~ error')
+    },
+    function (reason) {
+        console.log('---------- MyPromise chain callback failed 3 ----------')
+        console.log(reason);
+        return 333
+    }
+).then(
+    function (value) {
+        console.log('---------- MyPromise chain callback success 4 ----------')
+        console.log(value);
+    },
+    function (reason) {
+        console.log('---------- MyPromise chain callback failed 4 ----------')
+        console.log(reason);
+    }
+)
+
+
+myPromise.then()
+    .then()
+    .then()
+    .then(
+        function (value) {
+            console.log('---------- my promise value success ----------')
+            console.log(value)
+        },
+        function (reason) {
+            console.log('---------- my promise value failed ----------')
+            console.log(reason)
+        }
+    )
